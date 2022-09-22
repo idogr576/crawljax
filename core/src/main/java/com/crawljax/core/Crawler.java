@@ -20,6 +20,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.xml.xpath.XPathExpressionException;
 
+import com.github.chen0040.rl.learning.qlearn.QAgent;
 import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
@@ -1248,6 +1249,35 @@ public class Crawler {
 		}
 		return false;
 	}
+
+	static int stateCount = 500;
+	static int actionCount = 100;
+	static public QAgent agent = new QAgent(stateCount, actionCount);
+
+	public double getRewardFromState(StateVertex currentState) {
+		//currentState.
+
+		//currentState how many actions available, or counts for actions or counts for states
+		//and further improve with adding additional elements like "following the specifications"
+		return 1;
+	}
+
+	public double getNegativeReward() {
+		return -1;
+	}
+
+	static public int idCounter = 0;
+	public static int getActionId(CandidateElement element) {
+		HashMap<String, Integer> uniqueIds = new HashMap<String, Integer>();
+		String elementString = element.getUniqueString();
+		if (uniqueIds.containsKey(elementString)) {
+			return uniqueIds.get(elementString);
+		} else {
+			idCounter += 1;
+			uniqueIds.put(elementString, idCounter);
+			return idCounter;
+		}
+	}
 	
 	private void crawlThroughActionsOld() {
 		boolean interrupted = Thread.interrupted();
@@ -1270,6 +1300,23 @@ public class Crawler {
 						"Element {} not clicked because not all crawl conditions were satisfied",
 						element);
 			}
+
+
+			//
+
+
+
+
+			//not found new state get negative reward to the action if we haven't progressed
+			int actionId = getActionId(element);
+			if (newStateFound) {
+				double reward = getRewardFromState(stateMachine.getCurrentState());
+				agent.update(actionId, stateMachine.getCurrentState().getId(), reward);
+			} else {
+				agent.update(actionId, stateMachine.getCurrentState().getId(), getNegativeReward());
+			}
+
+
 
 			if (newStateFound && stateMachine.getCurrentState().hasNearDuplicate()) {
 				action = null;

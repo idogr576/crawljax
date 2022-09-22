@@ -1,10 +1,6 @@
 package com.crawljax.core;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.locks.Lock;
 
@@ -33,6 +29,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
 import com.google.common.util.concurrent.Striped;
+import com.crawljax.core.Crawler;
 
 /**
  * Contains all the {@link CandidateCrawlAction}s that still have to be fired to get a result.
@@ -102,7 +99,28 @@ public class UnfiredFragmentCandidates {
 		double maxExploredInfluence = 0.0;
 		CandidateCrawlAction bestExploredAction = null;
 		CandidateCrawlAction bestAction = null;
+
+		//to execute the policy we have to call our instance of an agent and get a best action from that agent
+		//we need to update the list of avalible actions from the state that the agent is in
+		//we convert all elements to the actionIds and give agent a subset
+
+
+
+
 		try {
+			HashSet<Integer> actionsAvailableAtCurrentState = new HashSet<Integer> ();
+			for(CandidateCrawlAction action: availableActions) {
+				actionsAvailableAtCurrentState.add(Crawler.getActionId(action.getCandidateElement()));
+			}
+			int selectedActionID = Crawler.agent.selectAction(actionsAvailableAtCurrentState).getIndex();
+			CandidateCrawlAction selectedAction = null;
+			for(CandidateCrawlAction action: availableActions) {
+				if (Crawler.getActionId(action.getCandidateElement()) == selectedActionID) {
+					selectedAction = action;
+				}
+			}
+			return selectedAction;
+			/*
 			for(CandidateCrawlAction action: availableActions) {
 				CandidateElement element = action.getCandidateElement();
 				if(element.isDirectAccess() || element.getEquivalentAccess() >= MAX_REPEAT) {
@@ -136,7 +154,7 @@ public class UnfiredFragmentCandidates {
 			else {
 				LOG.info("already explored {}", bestExploredAction);
 			}
-			return (bestAction!=null) ? bestAction : bestExploredAction;
+			return (bestAction!=null) ? bestAction : bestExploredAction;*/
 		}catch(Exception ex) {
 			ex.printStackTrace();
 		}finally {
@@ -147,10 +165,11 @@ public class UnfiredFragmentCandidates {
 	}
 	
 
+	//@param state The state you want to poll an {@link CandidateCrawlAction} for.
 	/**
 	 * @param fragmentManager 
 	 * @param afterBacktrack 
-	 * @param state The state you want to poll an {@link CandidateCrawlAction} for.
+	 *
 	 * @return The next to-be-crawled action or <code>null</code> if none available.
 	 */
 	CandidateCrawlAction pollActionOrNull(StateMachine stateMachine, FragmentManager fragmentManager, boolean afterBacktrack) {
