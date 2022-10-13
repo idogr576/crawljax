@@ -109,9 +109,11 @@ public class UnfiredFragmentCandidates {
 
 		try {
 			HashSet<Integer> actionsAvailableAtCurrentState = new HashSet<Integer> ();
+
 			for(CandidateCrawlAction action: availableActions) {
 				actionsAvailableAtCurrentState.add(Crawler.getActionId(action.getCandidateElement()));
 			}
+
 			int selectedActionID = Crawler.agent.selectAction(actionsAvailableAtCurrentState).getIndex();
 			CandidateCrawlAction selectedAction = null;
 			for(CandidateCrawlAction action: availableActions) {

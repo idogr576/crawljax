@@ -1267,8 +1267,8 @@ public class Crawler {
 	}
 
 	static public int idCounter = 0;
+	public static HashMap<String, Integer> uniqueIds = new HashMap<String, Integer>();
 	public static int getActionId(CandidateElement element) {
-		HashMap<String, Integer> uniqueIds = new HashMap<String, Integer>();
 		String elementString = element.getUniqueString();
 		if (uniqueIds.containsKey(elementString)) {
 			return uniqueIds.get(elementString);
