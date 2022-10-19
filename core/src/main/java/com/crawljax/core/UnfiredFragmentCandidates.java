@@ -87,7 +87,7 @@ public class UnfiredFragmentCandidates {
 		restoreConnectedEdges = crawlRules.isRestoreConnectedEdges();
 	}
 	
-	
+	public static int state_tracker = -1;
 	
 	private CandidateCrawlAction getBestAction(List<CandidateCrawlAction> availableActions, StateVertex state, FragmentManager fragmentManager) {
 		if(state.getRootFragment()!= null && !state.getRootFragment().isAccessTransferred()) {
@@ -112,6 +112,16 @@ public class UnfiredFragmentCandidates {
 
 			for(CandidateCrawlAction action: availableActions) {
 				actionsAvailableAtCurrentState.add(Crawler.getActionId(action.getCandidateElement()));
+			}
+
+			// make sure the agent is in the right state
+			// reset state in the agent
+			//
+			// state.getId()
+
+			if (state_tracker == -1) {
+				Crawler.agent.start(state.getId());
+				state_tracker = state.getId();
 			}
 
 			int selectedActionID = Crawler.agent.selectAction(actionsAvailableAtCurrentState).getIndex();
