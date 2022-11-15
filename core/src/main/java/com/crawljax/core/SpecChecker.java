@@ -4,26 +4,29 @@ import com.crawljax.core.state.StateVertex;
 import java.util.List;
 import java.util.ArrayList;
 
-
+// needs to be created using a singleton: only one instance required.
 public class SpecChecker {
-    /*
-    * input:
-    * a DOM state and a specification list, each list entry containing:
-    * (1) one or more identification means for a UI element
-    * (2) whether the element is a clickable
-    * output:
-    * return for each element in the specification list, whether it is present in the given DOM state
-    */
 
-    // a list of constraints, a node for each ui element
-    private List<StateConstraints> list;
-    StateVertex state;
+    private List<StateConstraints> list; // the name will be changed
+    private int stateConstraintsPtr;
 
     /**
-	 * @param state - the current DOM
-     * @param list - a list of identifications means for each ui element
-	 */
-    public SpecChecker(StateVertex state, List<StateConstraints> list) {
-        // work in progress
+     * @param list             - a list of StateConstraints
+     * @param stateConstraintsPtr - the index in the ArrayList of the current
+     *                         DOM state constraints
+     */
+
+    // constructor
+    public SpecChecker(List<StateConstraints> list) {
+        this.list = new ArrayList<StateConstraints>(list);
+        this.stateConstraintsPtr = 0; // the head of the list
+    }
+
+    public boolean isSatisfied() {
+        if (list.get(stateConstraintsPtr).isSatisfied()) {
+            stateConstraintsPtr++; // move the pointer to the next stateConstraints
+            return true;
+        }
+        return false;
     }
 }
