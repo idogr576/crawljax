@@ -2,8 +2,21 @@ package com.crawljax.core;
 
 import com.crawljax.core.state.Identification;
 import com.crawljax.core.state.Identification.How;
+import com.crawljax.core.CandidateCrawlAction;
+import com.crawljax.core.CandidateElement;
 import java.util.List;
 import java.util.ArrayList;
+
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathFactory;
+
+import org.w3c.dom.xpath;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import ord.w3c.dom.Document;
 
 public class StateConstraints {
     /*
@@ -21,7 +34,7 @@ public class StateConstraints {
      * AND - the intersection of the constraints associated with the ui-elements
      */
 
-    private class ElementConstraints {
+    private class ElementConstraints { // the class is temporarily public
         /*
          * inner class which implements a list of identifications means for a single
          * ui-element,
@@ -31,7 +44,7 @@ public class StateConstraints {
         private boolean isClickable;
 
         // constructor
-        public StateConstraints(List<Identification> identifications, boolean isClickable) {
+        public ElementConstraints(List<Identification> identifications, boolean isClickable) {
             this.identifications = new ArrayList<Identification>(identifications);
             this.isClickable = isClickable;
         }
@@ -47,7 +60,7 @@ public class StateConstraints {
         }
 
         // return the entire list
-        public List<Identification> getIdentifications(int index) {
+        public List<Identification> getIdentifications() {
             return identifications;
         }
 
@@ -72,16 +85,18 @@ public class StateConstraints {
             return null;
         }
 
-        // remove a specefic identification method
-        // return true if the element was removed and false if the element was not found
+        /**
+         * @param how - the identification method
+         * @return true if the element was removed and false if the element was not
+         *         found
+         */
         public boolean removeIdentification(How how) {
             Identification id = getIdentificationMethod(how);
-            if (id != null) {
+            if (!id.equals(null)) {
                 identifications.remove(id);
                 return true;
             }
             return false;
-
         }
 
         // clear the identification list
@@ -90,24 +105,32 @@ public class StateConstraints {
         }
     }
 
-    // a list of ElementConstraints objects which captures all the constraints on a
+    /**
+     * @param elementConstraintsList -  a list of ElementConstraints objects which captures all the constraints on a
     // single DOM state.
-    private List<ElementConstraints> stateConstraints;
+     */
+    private List<ElementConstraints> elementConstraintsList;
     // the semantics - AND/OR
     private Semantics semantics;
 
     // constructor
-    public StateConstraints(List<ElementConstraints> stateConstraints, Semantics semantics) {
-        this.stateConstraints = new ArrayList<ElementConstraints>(stateConstraints);
+    public StateConstraints(List<ElementConstraints> elementConstraintsList, Semantics semantics) {
+        this.elementConstraintsList = new ArrayList<ElementConstraints>(elementConstraintsList);
         this.semantics = semantics;
     }
 
-    // return true if the constraints were satisfied. otherwise, return false.
-    // currently, the only constraint is the presence of elements in the DOM state
-    public boolean isSatisfied() {
-    
+    public List<ElementConstraints> getElementConstraintsList() {
+        return elementConstraintsList;
+    }
+
+    /**
+     * @return true if the current DOM state is clickable or not, according to the
+     *         semantics:
+     *         AND - everything, OR - at least one
+     */
+    public boolean isClickable() {
         // iterate over the ElementConstraints list
-        for (ElementConstraints ec : stateConstraints) {
+        for (ElementConstraints ec : elementConstraintsList) {
             if (semantics.equals(Semantics.OR) && ec.isClickable()) {
                 // at least one ui-element satisfies the constraints, OR semantics
                 return true;
@@ -115,6 +138,31 @@ public class StateConstraints {
             if (semantics.equals(Semantics.AND) && !ec.isClickable()) {
                 // at least one ui-element doesn't satisfy to constraints, AND semantics
                 return false;
+            }
+        }
+        return semantics.equals(Semantics.AND) ? true : false;
+    }
+
+    /**
+     * @param doc - the document
+     * @return - whether or not the constraints were satisfied. in our case,
+     *          it is the presence of elements in the DOM state
+     */
+    public boolean isSatisfied(Document doc)
+    {
+        for(ElementConstraints ec : elementConstraintsList)
+        {
+            for(Identification id : ec.identifications){
+                // generate a new XPath varibale
+                XPath xpath = XPathFactory.newInstance().newXPath();
+                String expr = "//*[@" + id.getHow().toString() + "='" + id.getValue().toString() + "']"; // example: //*[@name='example_name']
+                Node node = (Node)xpath.evaluate(expr , doc, XPathConstants.NODE);
+                if(semantics.equals(Semantics.AND) && node.equals(null)){
+                   return false; 
+                }
+                if(semantics.equals(Semantics.OR) && !node.equals(null)){
+                    return true;
+                }
             }
         }
         return semantics.equals(Semantics.AND) ? true : false;
