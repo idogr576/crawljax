@@ -44,17 +44,24 @@ public class StateConstraints {
             this.isClickable = isClickable;
         }
 
-        // return true if the ui element is clickable
+        /**
+         * @return true if the ui element is clickable
+         */
         public boolean isClickable() {
             return isClickable;
         }
 
-        // return the identification method in the list at the specified index
+        /**
+         * @param index - the index at the identification list
+         * @return the identification method in the list at the specified index
+         */
         public Identification getIdentificationAt(int index) {
             return identifications.get(index);
         }
 
-        // return the entire list
+        /**
+         * @return the entire list
+         */
         public List<Identification> getIdentifications() {
             return identifications;
         }
@@ -69,8 +76,10 @@ public class StateConstraints {
             this.identifications.add(identification);
         }
 
-        // search the list for a specefic identification method.
-        // return the identification, or null if not found
+        /**
+         * @param how - the identification method to search the list for
+         * @return the identification, or null if not found
+         */
         Identification getIdentificationMethod(How how) {
             for (Identification id : identifications) {
                 if (id.getHow().equals(how)) {
@@ -87,7 +96,7 @@ public class StateConstraints {
          */
         public boolean removeIdentification(How how) {
             Identification id = getIdentificationMethod(how);
-            if (!id.equals(null)) {
+            if (id != null) {
                 identifications.remove(id);
                 return true;
             }
@@ -101,12 +110,12 @@ public class StateConstraints {
     }
 
     /**
-     * @param elementConstraintsList -  a list of ElementConstraints objects which captures all the constraints on a
-    // single DOM state.
+     * @param elementConstraintsList - a list of ElementConstraints objects which
+     *                               captures all the constraints on a
+     *                               single DOM state.
      */
     private List<ElementConstraints> elementConstraintsList;
-    // the semantics - AND/OR
-    private Semantics semantics;
+    private Semantics semantics; // the semantics - AND/OR
 
     // constructor
     public StateConstraints(List<ElementConstraints> elementConstraintsList, Semantics semantics) {
@@ -141,22 +150,21 @@ public class StateConstraints {
     /**
      * @param doc - the document
      * @return - whether or not the constraints were satisfied. in our case,
-     *          it is the presence of elements in the DOM state
+     *         it is the presence of elements in the DOM state
      * @throws XPathExpressionException
      */
-    public boolean isSatisfied(Document doc) throws XPathExpressionException
-    {
-        for(ElementConstraints ec : elementConstraintsList)
-        {
-            for(Identification id : ec.identifications){
+    public boolean isSatisfied(Document doc) throws XPathExpressionException {
+        for (ElementConstraints ec : elementConstraintsList) {
+            for (Identification id : ec.identifications) {
                 // generate a new XPath varibale
                 XPath xpath = XPathFactory.newInstance().newXPath();
-                String expr = "//*[@" + id.getHow().toString() + "='" + id.getValue().toString() + "']"; // example: //*[@name='example_name']
-                Node node = (Node)xpath.evaluate(expr , doc, XPathConstants.NODE);
-                if(semantics.equals(Semantics.AND) && node.equals(null)){
-                   return false; 
+                String expr = "//*[@" + id.getHow().toString() + "='" + id.getValue().toString() + "']"; // example:
+                                                                                                         // //*[@name='example_name']
+                Node node = (Node) xpath.evaluate(expr, doc, XPathConstants.NODE);
+                if (semantics.equals(Semantics.AND) && node == null) {
+                    return false;
                 }
-                if(semantics.equals(Semantics.OR) && !node.equals(null)){
+                if (semantics.equals(Semantics.OR) && node != null) {
                     return true;
                 }
             }
