@@ -1,13 +1,12 @@
 package com.crawljax.core;
 
-import com.crawljax.core.state.Identification.How;
-import com.crawljax.core.StateConstraints.ElementConstraints;
-import com.crawljax.core.state.Identification;
-import com.crawljax.core.state.StateVertex;
-
-import java.util.List;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.lang.String;
+import java.util.List;
+
+import javax.xml.xpath.XPathExpressionException;
+
+import com.crawljax.core.state.StateVertex;
 
 // needs to be created using a singleton: only one instance required.
 public class SpecChecker {
@@ -29,8 +28,10 @@ public class SpecChecker {
 
     /**
      * @param state - the current DOM state
+     * @throws IOException
+     * @throws XPathExpressionException
      */
-    public boolean isSatisfied(StateVertex state)
+    public boolean isSatisfied(StateVertex state) throws IOException, XPathExpressionException
     {
         if(list.get(index).isSatisfied(state.getDocument())){
             index++; // move the pointer to the next stateConstraints

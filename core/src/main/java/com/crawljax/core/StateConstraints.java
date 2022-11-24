@@ -2,21 +2,16 @@ package com.crawljax.core;
 
 import com.crawljax.core.state.Identification;
 import com.crawljax.core.state.Identification.How;
-import com.crawljax.core.CandidateCrawlAction;
-import com.crawljax.core.CandidateElement;
 import java.util.List;
 import java.util.ArrayList;
 
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import org.w3c.dom.xpath;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import ord.w3c.dom.Document;
 
 public class StateConstraints {
     /*
@@ -34,7 +29,7 @@ public class StateConstraints {
      * AND - the intersection of the constraints associated with the ui-elements
      */
 
-    private class ElementConstraints { // the class is temporarily public
+    private class ElementConstraints {
         /*
          * inner class which implements a list of identifications means for a single
          * ui-element,
@@ -147,8 +142,9 @@ public class StateConstraints {
      * @param doc - the document
      * @return - whether or not the constraints were satisfied. in our case,
      *          it is the presence of elements in the DOM state
+     * @throws XPathExpressionException
      */
-    public boolean isSatisfied(Document doc)
+    public boolean isSatisfied(Document doc) throws XPathExpressionException
     {
         for(ElementConstraints ec : elementConstraintsList)
         {
